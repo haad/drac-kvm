@@ -10,17 +10,11 @@ before_script:
   - go get honnef.co/go/tools/cmd/megacheck                     # Badass static analyzer/linter
   - go get github.com/fzipp/gocyclo
   - GO_FILES=$(find . -iname '*.go' -type f | grep -v /vendor/) # All the .go files, excluding vendor/
-  - echo ${GO_FILES}
 
 # script always run to completion (set +e). All of these code checks are must haves
 # in a modern Go project.
 script:
-  - echo ${GO_FILES}
-  - pwd
-  - ls -la
-  - test -z $(gofmt -s -l ${GO_FILES})         # Fail if a .go file hasn't been formatted with gofmt
-#  - go test -v -race ./...                   # Run all the tests with the race detector enabled
-  - go vet ./...                             # go vet is the official Go static analyzer
-  - megacheck ./...                          # "go vet on steroids" + linter
-  - gocyclo -over 19 ${GO_FILES}               # forbid code with huge functions
-  - golint -set_exit_status $(go list ./...) # one last linter
+  - test -z $(echo ${GO_FILES} | xargs gofmt -s -l)  # Fail if a .go file hasn't been formatted with gofmt
+  - go vet $(go list ./...)                          # go vet is the official Go static analyzer
+  - megacheck $(go list ./...)                       # "go vet on steroids" + linter
+  - golint -set_exit_status $(go list ./...)         # one last linter
